@@ -54,6 +54,8 @@ public class VideoPlayerView implements PlatformView, MethodChannel.MethodCallHa
     private Activity activity;
     @Nullable
     private EventChannel.EventSink eventSink;
+    @Nullable
+    private Map<String, Object> creationParams;
 
     // Track total played / covered time
     private long playbackStartMs = -1;
@@ -66,6 +68,7 @@ public class VideoPlayerView implements PlatformView, MethodChannel.MethodCallHa
                     @Nullable Map<String, Object> creationParams,
                     @Nullable Activity activity) {
         this.activity = activity;
+        this.creationParams = creationParams;
 
         // ── Build ExoPlayer ────────────────────────────────────────────────
         int maxBufferMs = 50000;
@@ -141,6 +144,10 @@ public class VideoPlayerView implements PlatformView, MethodChannel.MethodCallHa
             @Override
             public void onListen(Object arguments, EventChannel.EventSink sink) {
                 eventSink = sink;
+                if (VideoPlayerView.this.creationParams != null) {
+                    applyCreationParams(VideoPlayerView.this.creationParams);
+                    VideoPlayerView.this.creationParams = null;
+                }
             }
             @Override
             public void onCancel(Object arguments) {
@@ -203,11 +210,6 @@ public class VideoPlayerView implements PlatformView, MethodChannel.MethodCallHa
 
         // ── Notify Flutter player is ready ────────────────────────────────
         methodChannel.invokeMethod("onPlayerCreated", id);
-
-        // ── Apply creation params ─────────────────────────────────────────
-        if (creationParams != null) {
-            applyCreationParams(creationParams);
-        }
 
         startProgressReporting();
     }
