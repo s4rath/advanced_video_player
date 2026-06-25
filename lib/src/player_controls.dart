@@ -282,7 +282,10 @@ class _PlayerControlsOverlayState extends State<PlayerControlsOverlay> {
           color: Colors.black87,
           child: Center(
             child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 240),
+              constraints: const BoxConstraints(
+                maxWidth: 240,
+                maxHeight: 280, // Restrict maximum height in landscape/portrait
+              ),
               child: Material(
                 color: const Color(0xFF1E1E1E),
                 borderRadius: BorderRadius.circular(8),
@@ -301,7 +304,14 @@ class _PlayerControlsOverlayState extends State<PlayerControlsOverlay> {
                       ),
                       const Divider(
                           color: Colors.white12, height: 1),
-                      ...children,
+                      Flexible(
+                        child: SingleChildScrollView(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: children,
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ),

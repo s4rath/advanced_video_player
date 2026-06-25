@@ -7,10 +7,13 @@ class MyApp extends StatelessWidget {
   const MyApp({super.key});
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       title: 'Advanced Video Player Demo',
       debugShowCheckedModeBanner: false,
-      home: VideoPlayerScreen(),
+      theme: ThemeData.dark().copyWith(
+        scaffoldBackgroundColor: Colors.black,
+      ),
+      home: const VideoPlayerScreen(),
     );
   }
 }
@@ -27,7 +30,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
     with PlaybackEventListener {
   // Public MP4 test video
   static const _defaultUrl =
-      'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4';
+      'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8';
 
   AdvancedVideoPlayerController? _controller;
   String _status = 'Initializing…';
@@ -82,7 +85,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
                   // Status
                   Text(_status,
                       style: const TextStyle(
-                          color: Colors.white70, fontSize: 12)),
+                          color: Colors.black, fontSize: 12)),
                   const SizedBox(height: 12),
 
                   // ── Playback controls ─────────────────────────────────
@@ -265,12 +268,31 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
                 fontSize: 13)),
       );
 
-  Widget _chip(String label, VoidCallback? onTap) => GestureDetector(
-        onTap: onTap,
-        child: Chip(
-          label: Text(label, style: const TextStyle(fontSize: 12)),
-          backgroundColor: Colors.white12,
-          labelStyle: const TextStyle(color: Colors.white),
+  Widget _chip(String label, VoidCallback? onTap) => Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(20),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.08),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: Colors.white.withOpacity(0.18),
+                width: 1,
+              ),
+            ),
+            child: Text(
+              label,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0.1,
+              ),
+            ),
+          ),
         ),
       );
 }

@@ -18,7 +18,7 @@ class VideoTrack {
   /// Human-readable label, e.g. "720p" or "1500 kbps".
   String get label {
     if (height != null) return '${height}p';
-    if (bitrate != null) return '${(bitrate! / 1000).round()} kbps';
+    if (bitrate != null) return '$bitrate kbps';
     return 'Track $id'; // ignore: unnecessary_string_interpolation
   }
 

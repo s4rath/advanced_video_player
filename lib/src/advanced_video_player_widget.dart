@@ -82,6 +82,7 @@ class AdvancedVideoPlayerWidget extends StatefulWidget {
 class _AdvancedVideoPlayerWidgetState
     extends State<AdvancedVideoPlayerWidget> with WidgetsBindingObserver {
   static const String _viewType = 'advanced_video_player/video_player';
+  final GlobalKey _platformViewKey = GlobalKey();
 
   AdvancedVideoPlayerController? _controller;
   bool _isFullscreen = false;
@@ -122,6 +123,9 @@ class _AdvancedVideoPlayerWidgetState
   }
 
   Widget _buildPlayerWithControls() {
+    if (_isFullscreen) {
+      return const ColoredBox(color: Colors.black);
+    }
     final nativeView = _buildNativeView();
     if (!widget.showControls || _controller == null) return nativeView;
 
@@ -139,6 +143,7 @@ class _AdvancedVideoPlayerWidgetState
 
   Widget _buildNativeView() {
     return PlatformViewLink(
+      key: _platformViewKey,
       viewType: _viewType,
       surfaceFactory: (context, controller) => AndroidViewSurface(
         controller: controller as AndroidViewController,
