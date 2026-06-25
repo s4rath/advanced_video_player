@@ -56,6 +56,7 @@ public class VideoPlayerView implements PlatformView, MethodChannel.MethodCallHa
     private EventChannel.EventSink eventSink;
     @Nullable
     private Map<String, Object> creationParams;
+    private boolean isSecure = true;
 
     // Track total played / covered time
     private long playbackStartMs = -1;
@@ -216,6 +217,10 @@ public class VideoPlayerView implements PlatformView, MethodChannel.MethodCallHa
 
     @SuppressWarnings("unchecked")
     private void applyCreationParams(Map<String, Object> p) {
+        // Secure flag
+        Boolean secure = (Boolean) p.get("isSecure");
+        setSecure(secure == null || secure);
+
         // Source
         String videoUrl = (String) p.get("videoUrl");
         if (videoUrl != null && !videoUrl.isEmpty()) {
@@ -234,9 +239,27 @@ public class VideoPlayerView implements PlatformView, MethodChannel.MethodCallHa
         }
     }
 
+    @SuppressWarnings("unchecked")
     private void loadMedia(String url, @Nullable Map<String, Object> options) {
         MediaItem.Builder builder = new MediaItem.Builder().setUri(url);
-        exoPlayer.setMediaItem(builder.build());
+        MediaItem mediaItem = builder.build();
+
+        Map<String, String> httpHeaders = null;
+        if (options != null && options.get("httpHeaders") != null) {
+            httpHeaders = (Map<String, String>) options.get("httpHeaders");
+        }
+
+        if (httpHeaders != null && !httpHeaders.isEmpty()) {
+            DefaultHttpDataSource.Factory httpFactory =
+                    new DefaultHttpDataSource.Factory()
+                            .setDefaultRequestProperties(httpHeaders);
+            DefaultMediaSourceFactory mediaSourceFactory =
+                    new DefaultMediaSourceFactory(
+                            new DefaultDataSource.Factory(container.getContext(), httpFactory));
+            exoPlayer.setMediaSource(mediaSourceFactory.createMediaSource(mediaItem));
+        } else {
+            exoPlayer.setMediaItem(mediaItem);
+        }
 
         if (options != null) {
             Number startMs = (Number) options.get("startPositionMs");
@@ -363,11 +386,21 @@ public class VideoPlayerView implements PlatformView, MethodChannel.MethodCallHa
                 result.success(null);
                 break;
 
+            case "setSecure": {
+                boolean secure = (Boolean) call.arguments;
+                setSecure(secure);
+                result.success(null);
+                break;
+            }
+
             // ── Load ─────────────────────────────────────────────────────
             case "loadUrl": {
                 Map<String, Object> args = (Map<String, Object>) call.arguments;
                 String url = (String) args.get("url");
                 Map<String, Object> opts = new HashMap<>();
+                if (args != null && args.get("headers") != null) {
+                    opts.put("httpHeaders", args.get("headers"));
+                }
                 loadMedia(url, opts);
                 result.success(null);
                 break;
@@ -568,6 +601,18 @@ public class VideoPlayerView implements PlatformView, MethodChannel.MethodCallHa
         }
         exoPlayer.release();
         methodChannel.setMethodCallHandler(null);
+        setSecure(false);
+    }
+
+    private void setSecure(boolean secure) {
+        this.isSecure = secure;
+        if (activity != null) {
+            if (secure) {
+                activity.getWindow().addFlags(android.view.WindowManager.LayoutParams.FLAG_SECURE);
+            } else {
+                activity.getWindow().clearFlags(android.view.WindowManager.LayoutParams.FLAG_SECURE);
+            }
+        }
     }
 
     void setActivity(@Nullable Activity activity) {

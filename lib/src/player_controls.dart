@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import 'advanced_video_player_controller.dart';
@@ -27,6 +29,7 @@ class _PlayerControlsOverlayState extends State<PlayerControlsOverlay> {
   bool _visible = true;
   bool _showSpeedPicker = false;
   bool _showQualityPicker = false;
+  Timer? _hideTimer;
 
   @override
   void initState() {
@@ -37,6 +40,7 @@ class _PlayerControlsOverlayState extends State<PlayerControlsOverlay> {
 
   @override
   void dispose() {
+    _hideTimer?.cancel();
     widget.controller.removeListener(_onValueChanged);
     super.dispose();
   }
@@ -44,8 +48,15 @@ class _PlayerControlsOverlayState extends State<PlayerControlsOverlay> {
   void _onValueChanged() => setState(() {});
 
   void _scheduleHide() {
-    Future.delayed(const Duration(seconds: 3), () {
-      if (mounted) setState(() => _visible = false);
+    _hideTimer?.cancel();
+    _hideTimer = Timer(const Duration(seconds: 3), () {
+      if (mounted) {
+        setState(() {
+          _visible = false;
+          _showSpeedPicker = false;
+          _showQualityPicker = false;
+        });
+      }
     });
   }
 

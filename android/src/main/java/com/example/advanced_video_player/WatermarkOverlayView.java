@@ -101,16 +101,26 @@ public class WatermarkOverlayView extends FrameLayout {
     }
 
     // Place the watermark at a fixed relative position (0-1 of parent dimensions).
-    private void positionFixed(Map<String, Object> config) {
+    private void positionFixed(final Map<String, Object> config) {
         post(() -> {
-            float relX = config.get("positionX") != null
+            final float relX = config.get("positionX") != null
                     ? ((Number) config.get("positionX")).floatValue() : 0.1f;
-            float relY = config.get("positionY") != null
+            final float relY = config.get("positionY") != null
                     ? ((Number) config.get("positionY")).floatValue() : 0.1f;
 
             int parentW = getWidth();
             int parentH = getHeight();
-            if (parentW == 0 || parentH == 0) return;
+            if (parentW == 0 || parentH == 0) {
+                addOnLayoutChangeListener(new OnLayoutChangeListener() {
+                    @Override
+                    public void onLayoutChange(android.view.View v, int left, int top, int right, int bottom,
+                                               int oldLeft, int oldTop, int oldRight, int oldBottom) {
+                        removeOnLayoutChangeListener(this);
+                        positionFixed(config);
+                    }
+                });
+                return;
+            }
 
             watermarkText.setX(relX * parentW);
             watermarkText.setY(relY * parentH);

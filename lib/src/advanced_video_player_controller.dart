@@ -57,6 +57,7 @@ class AdvancedVideoPlayerController extends ChangeNotifier {
           isBuffering: state == PlayerState.buffering,
           isEnded: state == PlayerState.ended,
           isLoading: state == PlayerState.buffering,
+          clearError: state == PlayerState.ready,
         );
         notifyListeners();
         break;
@@ -223,6 +224,10 @@ class AdvancedVideoPlayerController extends ChangeNotifier {
 
   /// Enter Android Picture-in-Picture mode.
   Future<void> enterPiP() => _methodChannel.invokeMethod('enterPiP');
+
+  /// Enable or disable FLAG_SECURE on the native view activity window.
+  Future<void> setSecure(bool secure) =>
+      _methodChannel.invokeMethod('setSecure', secure);
 
   // ── Watermark ─────────────────────────────────────────────────────────────
 

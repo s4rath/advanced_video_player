@@ -19,6 +19,7 @@ public class AdvancedVideoPlayerPlugin implements FlutterPlugin, MethodCallHandl
 
     private MethodChannel channel;
     private VideoPlayerViewFactory viewFactory;
+    private Activity activity;
 
     @Override
     public void onAttachedToEngine(@NonNull FlutterPluginBinding binding) {
@@ -31,8 +32,16 @@ public class AdvancedVideoPlayerPlugin implements FlutterPlugin, MethodCallHandl
 
     @Override
     public void onMethodCall(@NonNull MethodCall call, @NonNull Result result) {
-        if (call.method.equals("getPlatformVersion")) {
-            result.success("Android " + android.os.Build.VERSION.RELEASE);
+        if (call.method.equals("setSecure")) {
+            boolean secure = (Boolean) call.arguments;
+            if (activity != null) {
+                if (secure) {
+                    activity.getWindow().addFlags(android.view.WindowManager.LayoutParams.FLAG_SECURE);
+                } else {
+                    activity.getWindow().clearFlags(android.view.WindowManager.LayoutParams.FLAG_SECURE);
+                }
+            }
+            result.success(null);
         } else {
             result.notImplemented();
         }
@@ -45,6 +54,7 @@ public class AdvancedVideoPlayerPlugin implements FlutterPlugin, MethodCallHandl
 
     @Override
     public void onAttachedToActivity(@NonNull ActivityPluginBinding binding) {
+        this.activity = binding.getActivity();
         if (viewFactory != null) {
             viewFactory.setActivity(binding.getActivity());
         }
@@ -55,6 +65,7 @@ public class AdvancedVideoPlayerPlugin implements FlutterPlugin, MethodCallHandl
 
     @Override
     public void onReattachedToActivityForConfigChanges(@NonNull ActivityPluginBinding binding) {
+        this.activity = binding.getActivity();
         if (viewFactory != null) {
             viewFactory.setActivity(binding.getActivity());
         }
@@ -62,6 +73,7 @@ public class AdvancedVideoPlayerPlugin implements FlutterPlugin, MethodCallHandl
 
     @Override
     public void onDetachedFromActivity() {
+        this.activity = null;
         if (viewFactory != null) {
             viewFactory.setActivity(null);
         }

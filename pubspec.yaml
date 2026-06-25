@@ -1,7 +1,7 @@
 name: advanced_video_player
-description: "A new Flutter plugin project."
+description: "A secure video player plugin for Flutter supporting ExoPlayer, dynamic watermarks, and FLAG_SECURE screen capture protection."
 version: 0.0.1
-homepage:
+homepage: 
 
 environment:
   sdk: ^3.12.1
